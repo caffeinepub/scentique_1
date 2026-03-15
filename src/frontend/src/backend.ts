@@ -93,6 +93,16 @@ export interface _CaffeineStorageRefillResult {
     success?: boolean;
     topped_up_amount?: bigint;
 }
+export interface ProductInput {
+    stockQuantity: bigint;
+    featured: boolean;
+    name: string;
+    description: string;
+    category: string;
+    sizeML: bigint;
+    imageId: string;
+    priceInCents: bigint;
+}
 export interface _CaffeineStorageRefillInformation {
     proposed_top_up_amount?: bigint;
 }
@@ -139,7 +149,7 @@ export interface backendInterface {
     _caffeineStorageRefillCashier(refillInformation: _CaffeineStorageRefillInformation | null): Promise<_CaffeineStorageRefillResult>;
     _caffeineStorageUpdateGatewayPrincipals(): Promise<void>;
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
-    addProduct(productData: Product): Promise<void>;
+    addProduct(productData: ProductInput): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     deleteProduct(id: bigint): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
@@ -153,7 +163,7 @@ export interface backendInterface {
     listProducts(): Promise<Array<Product>>;
     placeOrder(customerName: string, customerEmail: string, items: Array<OrderItem>): Promise<bigint>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    updateProduct(id: bigint, updateData: Product): Promise<void>;
+    updateProduct(id: bigint, updateData: ProductInput): Promise<void>;
 }
 import type { Product as _Product, UserProfile as _UserProfile, UserRole as _UserRole, _CaffeineStorageRefillInformation as __CaffeineStorageRefillInformation, _CaffeineStorageRefillResult as __CaffeineStorageRefillResult } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -256,7 +266,7 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async addProduct(arg0: Product): Promise<void> {
+    async addProduct(arg0: ProductInput): Promise<bigint> {
         if (this.processError) {
             try {
                 const result = await this.actor.addProduct(arg0);
@@ -452,7 +462,7 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async updateProduct(arg0: bigint, arg1: Product): Promise<void> {
+    async updateProduct(arg0: bigint, arg1: ProductInput): Promise<void> {
         if (this.processError) {
             try {
                 const result = await this.actor.updateProduct(arg0, arg1);

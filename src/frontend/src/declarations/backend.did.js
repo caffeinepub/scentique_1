@@ -19,8 +19,7 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
-export const Product = IDL.Record({
-  'id' : IDL.Nat,
+export const ProductInput = IDL.Record({
   'stockQuantity' : IDL.Nat,
   'featured' : IDL.Bool,
   'name' : IDL.Text,
@@ -36,6 +35,17 @@ export const UserRole = IDL.Variant({
   'guest' : IDL.Null,
 });
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const Product = IDL.Record({
+  'id' : IDL.Nat,
+  'stockQuantity' : IDL.Nat,
+  'featured' : IDL.Bool,
+  'name' : IDL.Text,
+  'description' : IDL.Text,
+  'category' : IDL.Text,
+  'sizeML' : IDL.Nat,
+  'imageId' : IDL.Text,
+  'priceInCents' : IDL.Nat,
+});
 export const OrderItem = IDL.Record({
   'productId' : IDL.Nat,
   'quantity' : IDL.Nat,
@@ -77,7 +87,7 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-  'addProduct' : IDL.Func([Product], [], []),
+  'addProduct' : IDL.Func([ProductInput], [IDL.Nat], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'deleteProduct' : IDL.Func([IDL.Nat], [], []),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
@@ -99,7 +109,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-  'updateProduct' : IDL.Func([IDL.Nat, Product], [], []),
+  'updateProduct' : IDL.Func([IDL.Nat, ProductInput], [], []),
 });
 
 export const idlInitArgs = [];
@@ -116,8 +126,7 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
-  const Product = IDL.Record({
-    'id' : IDL.Nat,
+  const ProductInput = IDL.Record({
     'stockQuantity' : IDL.Nat,
     'featured' : IDL.Bool,
     'name' : IDL.Text,
@@ -133,6 +142,17 @@ export const idlFactory = ({ IDL }) => {
     'guest' : IDL.Null,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const Product = IDL.Record({
+    'id' : IDL.Nat,
+    'stockQuantity' : IDL.Nat,
+    'featured' : IDL.Bool,
+    'name' : IDL.Text,
+    'description' : IDL.Text,
+    'category' : IDL.Text,
+    'sizeML' : IDL.Nat,
+    'imageId' : IDL.Text,
+    'priceInCents' : IDL.Nat,
+  });
   const OrderItem = IDL.Record({ 'productId' : IDL.Nat, 'quantity' : IDL.Nat });
   const Order = IDL.Record({
     'id' : IDL.Nat,
@@ -171,7 +191,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
-    'addProduct' : IDL.Func([Product], [], []),
+    'addProduct' : IDL.Func([ProductInput], [IDL.Nat], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'deleteProduct' : IDL.Func([IDL.Nat], [], []),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
@@ -193,7 +213,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-    'updateProduct' : IDL.Func([IDL.Nat, Product], [], []),
+    'updateProduct' : IDL.Func([IDL.Nat, ProductInput], [], []),
   });
 };
 

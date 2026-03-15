@@ -7,6 +7,16 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface ProductInput {
+    stockQuantity: bigint;
+    featured: boolean;
+    name: string;
+    description: string;
+    category: string;
+    sizeML: bigint;
+    imageId: string;
+    priceInCents: bigint;
+}
 export interface OrderItem {
     productId: bigint;
     quantity: bigint;
@@ -19,21 +29,8 @@ export interface Order {
     items: Array<OrderItem>;
     customerEmail: string;
 }
-export interface UserProfile {
-    name: string;
-}
 export interface Product {
     id: bigint;
-    stockQuantity: bigint;
-    featured: boolean;
-    name: string;
-    description: string;
-    category: string;
-    sizeML: bigint;
-    imageId: string;
-    priceInCents: bigint;
-}
-export interface ProductInput {
     stockQuantity: bigint;
     featured: boolean;
     name: string;
@@ -49,19 +46,16 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     addProduct(productData: ProductInput): Promise<bigint>;
-    assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     deleteProduct(id: bigint): Promise<void>;
-    getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getProduct(id: bigint): Promise<Product | null>;
-    getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     listByCategory(category: string): Promise<Array<Product>>;
     listFeatured(): Promise<Array<Product>>;
     listOrders(): Promise<Array<Order>>;
     listProducts(): Promise<Array<Product>>;
     placeOrder(customerName: string, customerEmail: string, items: Array<OrderItem>): Promise<bigint>;
-    saveCallerUserProfile(profile: UserProfile): Promise<void>;
     updateProduct(id: bigint, updateData: ProductInput): Promise<void>;
 }

@@ -30,6 +30,16 @@ export interface Product {
   'imageId' : string,
   'priceInCents' : bigint,
 }
+export interface ProductInput {
+  'stockQuantity' : bigint,
+  'featured' : boolean,
+  'name' : string,
+  'description' : string,
+  'category' : string,
+  'sizeML' : bigint,
+  'imageId' : string,
+  'priceInCents' : bigint,
+}
 export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -62,7 +72,7 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
-  'addProduct' : ActorMethod<[Product], undefined>,
+  'addProduct' : ActorMethod<[ProductInput], bigint>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'deleteProduct' : ActorMethod<[bigint], undefined>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
@@ -76,7 +86,7 @@ export interface _SERVICE {
   'listProducts' : ActorMethod<[], Array<Product>>,
   'placeOrder' : ActorMethod<[string, string, Array<OrderItem>], bigint>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  'updateProduct' : ActorMethod<[bigint, Product], undefined>,
+  'updateProduct' : ActorMethod<[bigint, ProductInput], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

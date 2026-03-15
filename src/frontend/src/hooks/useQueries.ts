@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { Order, OrderItem, Product } from "../backend";
+import type { Order, OrderItem, Product, ProductInput } from "../backend";
 import { useActor } from "./useActor";
 import { useInternetIdentity } from "./useInternetIdentity";
 
-export type ProductInput = Omit<Product, "id">;
+export type { ProductInput };
 
 export function useListProducts() {
   const { actor, isFetching } = useActor();
@@ -103,8 +103,7 @@ export function useAddProduct() {
   return useMutation({
     mutationFn: async (product: ProductInput) => {
       if (!actor) throw new Error("Not connected");
-      // Pass product as Product type; backend ignores id for new products
-      return actor.addProduct(product as Product);
+      return actor.addProduct(product);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["products"] });
@@ -118,7 +117,7 @@ export function useUpdateProduct() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: bigint; data: ProductInput }) => {
       if (!actor) throw new Error("Not connected");
-      return actor.updateProduct(id, data as Product);
+      return actor.updateProduct(id, data);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["products"] });
