@@ -70,20 +70,40 @@ export default function ProductFormPage() {
       const hash = await uploadImage(file);
       setImageId(hash);
       toast.success("Image uploaded!");
-    } catch {
-      toast.error("Image upload failed.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(`Image upload failed: ${msg}`);
       setImagePreview("");
+    } finally {
+      e.target.value = "";
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const priceInCents = BigInt(Math.round(Number.parseFloat(priceStr) * 100));
-    const sizeML = BigInt(Number.parseInt(sizeStr));
-    const stockQuantity = BigInt(Number.parseInt(stockStr));
 
-    const productData = {
-      id: productId ?? 0n,
+    const price = Number.parseFloat(priceStr);
+    const size = Number.parseInt(sizeStr);
+    const stock = Number.parseInt(stockStr);
+
+    if (Number.isNaN(price) || price < 0) {
+      toast.error("Please enter a valid price.");
+      return;
+    }
+    if (Number.isNaN(size) || size < 1) {
+      toast.error("Please enter a valid size in ml.");
+      return;
+    }
+    if (Number.isNaN(stock) || stock < 0) {
+      toast.error("Please enter a valid stock quantity.");
+      return;
+    }
+
+    const priceInCents = BigInt(Math.round(price * 100));
+    const sizeML = BigInt(size);
+    const stockQuantity = BigInt(stock);
+
+    const productInput = {
       name,
       description,
       priceInCents,
@@ -96,15 +116,16 @@ export default function ProductFormPage() {
 
     try {
       if (isEdit && productId !== null) {
-        await updateProduct({ id: productId, data: productData });
+        await updateProduct({ id: productId, data: productInput });
         toast.success("Product updated!");
       } else {
-        await addProduct(productData);
+        await addProduct(productInput);
         toast.success("Product added!");
       }
       navigate({ to: "/admin" });
-    } catch {
-      toast.error("Failed to save product.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(`Failed to save product: ${msg}`);
     }
   };
 

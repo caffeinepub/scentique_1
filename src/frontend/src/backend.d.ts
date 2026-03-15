@@ -33,13 +33,23 @@ export interface Product {
     imageId: string;
     priceInCents: bigint;
 }
+export interface ProductInput {
+    stockQuantity: bigint;
+    featured: boolean;
+    name: string;
+    description: string;
+    category: string;
+    sizeML: bigint;
+    imageId: string;
+    priceInCents: bigint;
+}
 export enum UserRole {
     admin = "admin",
     user = "user",
     guest = "guest"
 }
 export interface backendInterface {
-    addProduct(productData: Product): Promise<void>;
+    addProduct(productData: ProductInput): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     deleteProduct(id: bigint): Promise<void>;
     getCallerUserProfile(): Promise<UserProfile | null>;
@@ -53,5 +63,5 @@ export interface backendInterface {
     listProducts(): Promise<Array<Product>>;
     placeOrder(customerName: string, customerEmail: string, items: Array<OrderItem>): Promise<bigint>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    updateProduct(id: bigint, updateData: Product): Promise<void>;
+    updateProduct(id: bigint, updateData: ProductInput): Promise<void>;
 }

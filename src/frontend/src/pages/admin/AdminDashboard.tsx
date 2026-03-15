@@ -26,9 +26,9 @@ import {
 import { motion } from "motion/react";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import type { Product } from "../../backend";
 import { useInternetIdentity } from "../../hooks/useInternetIdentity";
 import {
+  type ProductInput,
   useAddProduct,
   useDeleteProduct,
   useIsAdmin,
@@ -36,7 +36,7 @@ import {
   useListProducts,
 } from "../../hooks/useQueries";
 
-const SAMPLE_PRODUCTS: Omit<Product, "id">[] = [
+const SAMPLE_PRODUCTS: ProductInput[] = [
   {
     name: "Midnight Cedar",
     description:
@@ -120,9 +120,7 @@ export default function AdminDashboard() {
     if (!products || products.length > 0 || !isAdmin) return;
     const seed = async () => {
       try {
-        await Promise.all(
-          SAMPLE_PRODUCTS.map((p) => addProduct({ ...p, id: 0n })),
-        );
+        await Promise.all(SAMPLE_PRODUCTS.map((p) => addProduct(p)));
         toast.success("Sample products added!");
       } catch {
         // silent

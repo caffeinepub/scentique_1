@@ -30,6 +30,17 @@ actor {
     featured : Bool;
   };
 
+  public type ProductInput = {
+    name : Text;
+    description : Text;
+    priceInCents : Nat;
+    category : Text;
+    sizeML : Nat;
+    stockQuantity : Nat;
+    imageId : Text;
+    featured : Bool;
+  };
+
   module Product {
     public func compare(p1 : Product, p2 : Product) : Order.Order {
       Text.compare(p1.name, p2.name);
@@ -62,17 +73,16 @@ actor {
 
   let userProfiles = Map.empty<Principal, UserProfile>();
 
-  public shared ({ caller }) func addProduct(productData : Product) : async () {
+  public shared ({ caller }) func addProduct(productData : ProductInput) : async Nat {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
 
-    if (products.containsKey(productData.id)) {
-      Runtime.trap("This product id already exists");
-    };
+    let id = nextProductId;
+    nextProductId += 1;
 
     let product : Product = {
-      id = productData.id;
+      id;
       name = productData.name;
       description = productData.description;
       priceInCents = productData.priceInCents;
@@ -83,10 +93,11 @@ actor {
       featured = productData.featured;
     };
 
-    products.add(product.id, product);
+    products.add(id, product);
+    id;
   };
 
-  public shared ({ caller }) func updateProduct(id : Nat, updateData : Product) : async () {
+  public shared ({ caller }) func updateProduct(id : Nat, updateData : ProductInput) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
     };
