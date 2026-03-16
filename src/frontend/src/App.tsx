@@ -1,6 +1,7 @@
 import {
   Outlet,
   RouterProvider,
+  createHashHistory,
   createRootRoute,
   createRoute,
   createRouter,
@@ -14,6 +15,8 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import ShopPage from "./pages/ShopPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductFormPage from "./pages/admin/ProductFormPage";
+
+const hashHistory = createHashHistory();
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -84,7 +87,7 @@ const routeTree = rootRoute.addChildren([
   adminProductEditRoute,
 ]);
 
-const router = createRouter({ routeTree });
+const router = createRouter({ routeTree, history: hashHistory });
 
 declare module "@tanstack/react-router" {
   interface Register {

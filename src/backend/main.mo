@@ -15,7 +15,16 @@ import MixinAuthorization "authorization/MixinAuthorization";
 actor {
   include MixinStorage();
 
-  let accessControlState = AccessControl.initState();
+  // Stable storage for access control state
+  stable var stableAdminAssigned : Bool = false;
+  stable var stableUserRolesEntries : [(Principal, AccessControl.UserRole)] = [];
+
+  // Initialize access control state (will be populated from stable storage in postupgrade)
+  let accessControlState : AccessControl.AccessControlState = {
+    var adminAssigned = stableAdminAssigned;
+    userRoles = Map.empty<Principal, AccessControl.UserRole>();
+  };
+
   include MixinAuthorization(accessControlState);
 
   public type Product = {
@@ -74,6 +83,8 @@ actor {
   var orders = Map.empty<Nat, Order>();
 
   // Legacy stub - kept to avoid upgrade compatibility errors (M0169)
+  stable var _stableAdminPrincipal : ?Principal = null;
+
   public type UserProfile = { name : Text };
   let userProfiles = Map.empty<Principal, UserProfile>();
 
@@ -81,6 +92,9 @@ actor {
   system func preupgrade() {
     productsEntries := products.entries().toArray();
     ordersEntries := orders.entries().toArray();
+    // Save access control state
+    stableAdminAssigned := accessControlState.adminAssigned;
+    stableUserRolesEntries := accessControlState.userRoles.entries().toArray();
   };
 
   system func postupgrade() {
@@ -92,18 +106,17 @@ actor {
       orders.add(k, v);
     };
     ordersEntries := [];
+    // Restore access control state
+    accessControlState.adminAssigned := stableAdminAssigned;
+    for ((k, v) in stableUserRolesEntries.vals()) {
+      accessControlState.userRoles.add(k, v);
+    };
+    stableUserRolesEntries := [];
   };
 
   func requireAdmin(caller : Principal) {
-    switch (_stableAdminPrincipal) {
-      case (?admin) {
-        if (caller != admin) {
-          Runtime.trap("Unauthorized: Only admin can perform this action");
-        };
-      };
-      case (null) {
-        Runtime.trap("Unauthorized: No admin registered yet");
-      };
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admin can perform this action");
     };
   };
 
