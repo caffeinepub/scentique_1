@@ -156,6 +156,8 @@ export interface backendInterface {
     getCallerUserRole(): Promise<UserRole>;
     getProduct(id: bigint): Promise<Product | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    claimAdmin(): Promise<boolean>;
+    isCallerAdminSimple(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     listByCategory(category: string): Promise<Array<Product>>;
     listFeatured(): Promise<Array<Product>>;
@@ -363,6 +365,14 @@ export class Backend implements backendInterface {
             const result = await this.actor.getUserProfile(arg0);
             return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
         }
+    }
+    async claimAdmin(): Promise<boolean> {
+        const result = await this.actor.claimAdmin();
+        return result;
+    }
+    async isCallerAdminSimple(): Promise<boolean> {
+        const result = await this.actor.isCallerAdminSimple();
+        return result;
     }
     async isCallerAdmin(): Promise<boolean> {
         if (this.processError) {

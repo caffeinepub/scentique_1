@@ -40,16 +40,11 @@ export interface Product {
     imageId: string;
     priceInCents: bigint;
 }
-export enum UserRole {
-    admin = "admin",
-    user = "user",
-    guest = "guest"
-}
 export interface backendInterface {
-    _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
+    claimAdmin(): Promise<boolean>;
+    isCallerAdminSimple(): Promise<boolean>;
     addProduct(productData: ProductInput): Promise<bigint>;
     deleteProduct(id: bigint): Promise<void>;
-    getCallerUserRole(): Promise<UserRole>;
     getProduct(id: bigint): Promise<Product | null>;
     isCallerAdmin(): Promise<boolean>;
     listByCategory(category: string): Promise<Array<Product>>;

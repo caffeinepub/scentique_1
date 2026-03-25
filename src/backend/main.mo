@@ -15,17 +15,50 @@ import MixinAuthorization "authorization/MixinAuthorization";
 actor {
   include MixinStorage();
 
-  // Stable storage for access control state
+  // Stable storage for access control state (kept for upgrade compatibility)
   stable var stableAdminAssigned : Bool = false;
   stable var stableUserRolesEntries : [(Principal, AccessControl.UserRole)] = [];
 
-  // Initialize access control state (will be populated from stable storage in postupgrade)
   let accessControlState : AccessControl.AccessControlState = {
     var adminAssigned = stableAdminAssigned;
     userRoles = Map.empty<Principal, AccessControl.UserRole>();
   };
 
   include MixinAuthorization(accessControlState);
+
+  // Simple admin principal -- first caller to invoke claimAdmin becomes admin
+  stable var adminPrincipal : ?Principal = null;
+
+  // Claim admin role -- only works if no admin is set yet
+  public shared ({ caller }) func claimAdmin() : async Bool {
+    if (caller.isAnonymous()) { return false };
+    switch (adminPrincipal) {
+      case (null) {
+        adminPrincipal := ?caller;
+        true;
+      };
+      case (?_) { false };
+    };
+  };
+
+  // Check if caller is admin using the simple principal-based system
+  public query ({ caller }) func isCallerAdminSimple() : async Bool {
+    if (caller.isAnonymous()) { return false };
+    switch (adminPrincipal) {
+      case (?admin) { caller == admin };
+      case (null) { false };
+    };
+  };
+
+  func requireAdmin(caller : Principal) {
+    let ok = switch (adminPrincipal) {
+      case (?admin) { caller == admin };
+      case (null) { false };
+    };
+    if (not ok) {
+      Runtime.trap("Unauthorized: Only admin can perform this action");
+    };
+  };
 
   public type Product = {
     id : Nat;
@@ -92,7 +125,6 @@ actor {
   system func preupgrade() {
     productsEntries := products.entries().toArray();
     ordersEntries := orders.entries().toArray();
-    // Save access control state
     stableAdminAssigned := accessControlState.adminAssigned;
     stableUserRolesEntries := accessControlState.userRoles.entries().toArray();
   };
@@ -106,18 +138,11 @@ actor {
       orders.add(k, v);
     };
     ordersEntries := [];
-    // Restore access control state
     accessControlState.adminAssigned := stableAdminAssigned;
     for ((k, v) in stableUserRolesEntries.vals()) {
       accessControlState.userRoles.add(k, v);
     };
     stableUserRolesEntries := [];
-  };
-
-  func requireAdmin(caller : Principal) {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admin can perform this action");
-    };
   };
 
   public shared ({ caller }) func addProduct(productData : ProductInput) : async Nat {

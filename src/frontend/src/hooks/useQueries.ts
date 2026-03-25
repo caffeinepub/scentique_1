@@ -73,7 +73,11 @@ export function useIsAdmin() {
     queryKey: ["isAdmin", identity?.getPrincipal().toString()],
     queryFn: async () => {
       if (!actor) return false;
-      return actor.isCallerAdmin();
+      try {
+        return await actor.isCallerAdminSimple();
+      } catch {
+        return false;
+      }
     },
     enabled: !!actor && !isFetching && !!identity,
   });
